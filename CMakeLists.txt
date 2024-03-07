@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.17)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+if(NOT CMAKE_BUILD_TYPE AND NOT (MSVC_IDE OR XCODE))
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type, one of: Release, Debug"
+            FORCE)
+endif()
+
+project(AI_Virtual_Painter CXX)
+message( STATUS "Build type: ${CMAKE_BUILD_TYPE}" )
+message( STATUS "Configuration types: ${CMAKE_CONFIGURATION_TYPES}" )
+
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(64_BIT_OS TRUE)
+    message( STATUS "A 64-bit OS detected" )
+else()
+    SET(64_BIT_OS FALSE)
+    message( STATUS "A 32-bit OS detected" )
+endif()
+
+# OpenCV file path, may need to change
+if(WIN32)
+    set(OpenCV_DIR "D:/_Program Files/opencv/build/x64/vc15/lib")
+endif()
+if(APPLE)
+    set(OpenCV_DIR "/usr/local/Cellar/opencv/4.5.1_2/include/opencv4")
+endif()
+find_package(OpenCV REQUIRED)
+
+message(STATUS "OpenCV library status:")
+message(STATUS " config: ${OpenCV_DIR}")
+message(STATUS " version: ${OpenCV_VERSION}")
+message(STATUS " libraries: ${OpenCV_LIBS}")
+message(STATUS " include path: ${OpenCV_INCLUDE_DIRS}")
+file(GLOB srcs *.cpp *.c)
+file(GLOB hdrs *.hpp *.h)
+include_directories("${CMAKE_CURRENT_LIST_DIR}")
+
+macro(add_example name)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} ${OpenCV_LIBS} )
+endmacro()
+
+macro(add_gui_example name)
+    if (DLIB_NO_GUI_SUPPORT)
+        message("No GUI support, so we won't build the ${name} example.")
+    else()
+        add_example(${name})
+    endif()
+endmacro()
+add_example(main)
